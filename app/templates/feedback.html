@@ -1,0 +1,26 @@
+{% extends "main.html" %}
+{% block cont %}
+
+<h2 class="u-title">Feedback</h2>
+
+<script type="text/javascript" src="/static/editor/ckeditor.js"></script>
+
+<form action="/sys_feedback?url={{ link }}" method="post" enctype="multipart/form-data">
+	<input type="text" name="name" placeholder="Name" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" required>
+
+	<br><br>
+	<textarea id="editor" name="cont" placeholder="Content" class="u-cont" required></textarea>
+
+	<div class="g-recaptcha" data-sitekey="6LeYMmkUAAAAAH11GeXRIw3BBXooXtKTm9cze9h6" style="margin: 15px 0 0 0; width: 100%; text-align: center;"></div>
+	<input type="submit" value="Send">
+</form>
+
+<script>
+var editor = CKEDITOR.replace('editor',{height: 500});
+AjexFileManager.init({returnTo: 'ckeditor', editor: editor});
+</script>
+
+<!-- Captcha -->
+<script src='https://www.google.com/recaptcha/api.js'></script>
+
+{% endblock %}

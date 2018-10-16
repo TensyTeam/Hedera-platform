@@ -1,0 +1,16 @@
+{% extends "main.html" %}
+{% block cont %}
+
+{% from 'list_step_two.html' import list_step %}
+
+<h2 class="u-title">{{ step.name }}</h2>
+
+<br>
+
+{{ list_step(step, ladder, id, answers, enumerate, user, type, href) }}
+
+<br><br>
+
+Author: &nbsp; <a href="/user/{{ author.id }}" class="u-href">{{ author.name }} {{ author.surname }}</a>
+
+{% endblock %}

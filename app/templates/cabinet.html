@@ -1,0 +1,138 @@
+{% extends "main.html" %}
+{% block cont %}
+
+<!-- <script type="text/javascript" src="/static/qtum.js"></script> -->
+<script type="text/javascript" src="/static/socket.io.min.js"></script>
+
+<br>
+
+<h2 class="u-stat"><img src="/static/token.svg" alt="Tokens" title="Tokens"> &nbsp; {{ user.balance }} ℏ</h2><!-- <a href="/wallet" class="u-tok"></a> -->
+<h2 class="u-stat"><img src="/static/rating.svg" alt="Rating" title="Rating"> &nbsp; {{ user.rating }}</h2>
+
+<div class="u-window" style="font-size: 0.9em; border: 1px dashed var(--border-active); padding: 15px; margin: 10px; border-radius: 17px; word-break: break-word; display: none;"></div>
+<script type="text/javascript" charset="utf-8">
+
+// Проверка наличия пароля
+
+var password = window.sessionStorage.getItem("password");
+
+if (!password) {
+	$('.u-body').html('<a href="/password/?url=cabinet">Enter password</a>');
+	window.location = '/password/?url=cabinet';
+}
+
+{% if 'public' not in user %}
+
+// Создание ключа
+
+String.prototype.replaceAll = function(search, replace){
+	return this.split(search).join(replace);
+}
+
+keys = TEST.generate_priv_key();
+var text = 'Public key%2CPrivate key%2CMnemonic%0A' + keys.address + '%2C' + keys.wif + '%2C' + keys.mnemonic.replaceAll(' ', '%20');
+$('.u-window').css('display', 'block'); //
+$('.u-window').html('<h3 style="margin: 0 0 3px 5px;">Warning! Remember this information!</h2>Public key: <font color="red">' + keys.address + '</font><br>Private key: <font color="red">' + keys.wif + '</font><br>Mnemonic phrase: <font color="red">' + keys.mnemonic + '</font><br><a style="border-bottom: 1px dashed; cursor: pointer; margin: 7px 0 0 0;" href="data:application/octet-stream,' + text + '">Download</a>');
+
+namespace = 'reg';
+var socket = io.connect('{{ LINK }}' + namespace);
+socket.emit('public', {key: keys.address, token: "{{ token }}"});
+
+window.localStorage.setItem('public', keys.address);
+window.localStorage.setItem('private', TEST.encrypt(keys.wif, password));
+// window.localStorage.setItem("mnemonic", keys.mnemonic);
+
+var public = keys.address;
+var private = keys.wif;
+// var mnemonic = keys.mnemonic;
+
+// Получение токенов
+
+function httpGet(theUrl) {
+	var xmlHttp = new XMLHttpRequest();
+	xmlHttp.open("GET", theUrl, false); // false for synchronous request
+	xmlHttp.send(null);
+	return xmlHttp.responseText;
+}
+
+console.log(httpGet('http://40.67.212.77:3000/faucet/' + public));
+
+{% else %}
+
+// Проверка наличия ключей
+
+// var public = window.localStorage.getItem("public");
+// var private_enc = window.localStorage.getItem("private");
+
+// var f = false;
+// if (public && private_enc) {
+// 	private = TEST.decrypt(private_enc, password);
+// 	if (!private) {
+// 		f = true;
+// 	} else if (!TEST.checkPrivKey(private, public)) {
+// 		f = true;
+// 	}
+// } else {
+// 	f = true;
+// }
+
+// if (f) {
+// 	$('.u-body').html('<a href="/token/?url=cabinet">Enter keys</a>');
+// 	window.location = '/token/?url=cabinet';
+// }
+
+// // var mnemonic = window.localStorage.getItem("mnemonic");
+
+// // Окошко с ключами
+
+// var text = 'Public key%2CPrivate key%0A' + public + '%2C' + private;
+// $('.u-window').html('<h3 style="margin: 0 0 3px 5px;">Warning! Remember this information!</h2>Public key: <font color="red">' + public + '</font><br>Private key: <font color="red">' + private + '</font><br><a style="border-bottom: 1px dashed; cursor: pointer; margin: 7px 0 0 0;" href="data:application/octet-stream,' + text + '">Download</a>');
+
+// {% endif %}
+
+// Получение баланса
+
+// TEST.get_info(public)
+// .then(function (res) {$('.u-tok').html("&nbsp; " + (res.balance * 1000).toFixed());})
+// .catch(err => console.log(err))
+
+</script>
+
+<h2 class="title2">Update avatar</h2>
+<img src="{{ preview('users', user.id) }}" class="u-ava"><br>
+
+<form action="/sys_profile_edit?url={{ loc }}" method="post" enctype="multipart/form-data">
+	<input type="file" name="photo" class="photo" id="photo">
+	<label for="photo">Select photo</label>
+	<script>
+
+$('.photo').on('change', function() {
+	var file = this.value.split('\\');
+	file = file[file.length-1];
+
+	if ($('div').is('.u-files')) {
+		$('.u-files').html(file);
+	} else {
+		$('label').after('<div class="u-files">' + file + '</div>');
+	}
+});
+
+	</script>
+
+	<h2 class="title2">Personal information</h2>
+	<input type="text" name="name" placeholder="Name"{% if user.name %} value="{{ user.name }}"{% endif %}>
+	<input type="text" name="surname" placeholder="Surname"{% if user.surname %} value="{{ user.surname }}"{% endif %}>
+
+	<h2 class="title2">Description</h2>
+	<textarea name="description" placeholder="Description">{% if user.description %}{{ user.description }}{% endif %}</textarea>
+
+	<h2 class="title2">Contacts</h2>
+	<input type="text" name="mail" placeholder="Mail" value="{{ user.mail }}">
+
+	<h2 class="title2">Change password</h2>
+	<input type="password" name="pass" readonly onfocus="this.removeAttribute('readonly')">
+
+	<input type="submit" value="Save">
+</form>
+
+{% endblock %}

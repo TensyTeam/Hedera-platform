@@ -1,0 +1,38 @@
+{% extends "main.html" %}
+{% block cont %}
+
+<h2 class="u-title" style="padding: 7px 0 15px 0;">{{ ladder.name }}{% if user.admin >= 5 or ladder.user == user.id %} &nbsp; <a href="?edit=1"><img src="/static/edit.svg" alt="Edit" title="Edit"></a>{% endif %}</h2>
+
+<img src="{{ preview('ladders', ladder.id) }}" alt="{{ ladder.name }}" title="{{ ladder.name }}" class="u-ava"><br>
+
+{% for i in ladder.tags %}<a href="/search/{{ i }}"><div class="u-tag">{{ i }}</div></a>{% endfor %}<br><br>
+
+<div class="u-block">
+	{{ ladder.description }}
+</div>
+
+<br><br>
+
+<input type="submit" value="{% if num == -1 %}Completed{% else %}{% if user.admin >= 3 and user.ladders[str(ladder)] %}Continue{% else %}Start{% endif %}" onclick="location.href='question/{{ step }}';{% endif %}">
+
+<br>
+
+<input type="submit" value="Add step" onclick="location.href='/admin/add/step/{{ ladder.id }}';">
+
+<br><br><hr><br>
+<h2 class="u-title">Experts</h2>
+
+<div class="u-notes">
+	{% for i in experts %}<a href="/user/{{ i.id }}"><div><div class="u-img" style="background-image: url({{ preview('users', i.id) }}");"></div><div class="u-text">{{ i.name }} {{ i.surname }}<p>Complete {{ i.complete }} steps</p></div></div></a>{% endfor %}
+</div>
+
+{% if user_steps %}
+<br><br><hr><br>
+<h2 class="u-title">Passed steps</h2>
+
+<div class="u-notes">
+	{% for i in user_steps %}<a href="/ladder/{{ ladder.id }}/question/{{ i.id }}"><div><div class="u-text">{{ i.name }}</div></div></a>{% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}

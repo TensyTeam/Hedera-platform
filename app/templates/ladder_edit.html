@@ -1,0 +1,60 @@
+{% extends "main.html" %}
+{% block cont %}
+
+{% from 'list_step_one.html' import list_step %}
+
+<style>
+.u-ava {width: 100%; margin-top: 10px;}
+.u-step {width: 100%; cursor: pointer;}
+.u-href {display: block; content: ""; height: 100px; margin: -100px 0 0;}
+</style>
+
+<h2 class="u-title">Edit ladder &nbsp; <a href="./"><img src="/static/view.svg" alt="View" title="View"></a></h2>
+
+<form action="/sys_ladder_edit?id={{ ladder.id }}" method="post" enctype="multipart/form-data">
+	<input type="text" name="name" placeholder="Name" value="{{ ladder.name }}" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" required>
+
+	<img src="{{ preview('ladders', ladder.id) }}" alt="{{ ladder.name }}" title="{{ ladder.name }}" class="u-ava"><br>
+	<input type="file" name="preview" class="preview" id="preview">
+	<label for="preview">Update preview</label>
+	<script>
+
+$('.preview').on('change', function() {
+	var file = this.value.split('\\');
+	file = file[file.length-1];
+
+	if ($('div').is('.u-files')) {
+		$('.u-files').html(file);
+	} else {
+		$('label').after('<div class="u-files">' + file + '</div>');
+	}
+});
+
+	</script>
+
+	<textarea name="description" placeholder="Description" class="u-cont">{{ ladder.description }}</textarea>
+
+	<br><br>
+
+	<input type="text" name="tags" placeholder="Tags (example: tag 1; tag 2)" value="{{ ';'.join(ladder.tags) }}" readonly onfocus="this.removeAttribute('readonly')">
+
+	<input type="submit" value="Edit">
+</form>
+
+<br><br><hr><hr><br><br>
+
+{% for i, el in enumerate(ladder.steps) %}
+<a name="{{ i }}" class="u-href"></a>
+
+<div class="u-step" onclick="location.href='/ladder/{{ ladder.id }}/question/{{ el.id }}'">
+	<h2 class="u-title">Step {{ i }} #{{ ladder.id }}-{{ el.id }}{% if i==0 %} (Ground){% endif %} &nbsp; <a href="/sys_step_delete?ladder={{ ladder.id }}&step={{ el.id }}&num={{ i }}"><img src="/static/delete.svg" alt="Delete" title="Delete"></a></h2>
+	{{ el.name }}
+</div>
+
+<br><br><hr><br>
+
+{% endfor %}
+
+{{ list_step(None, ladder.id, None, None, user, steps, True) }}
+
+{% endblock %}

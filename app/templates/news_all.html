@@ -1,0 +1,15 @@
+{% extends "main.html" %}
+{% block cont %}
+
+{% from 'list_note.html' import list_note %}
+{% from 'list_user.html' import list_user %}
+
+<div class="u-info" onclick="change();">↑ Tap on the logo ↑</div>
+
+<h2 class="u-title">News</h2>
+
+<div class="u-notes">
+	{% for i in news %}<a href="/news/{{ i.id }}"><div><div class="u-img" style="background-image: url({{ preview('news', i.id) }}");"></div><div class="u-text">{{ i.name }}</div></div></a>{% endfor %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,20 @@
+{% macro list_step(el, ladder, step, answers, enumerate, user, type=False, href=False) %}
+<script type="text/javascript" src="/static/editor/ckeditor.js"></script>
+
+	<h3 class="u-title">Choose correct answers</h3>
+
+	<form action="/sys_step_more?ladder={{ ladder }}&step={{ step }}{% if href %}&href=1{% endif %}" method="post" enctype="multipart/form-data">
+		{% for i, ele in enumerate(el.options) %}<label class="u-check"><input type="checkbox" name="{{ i+1 }}" value="1"{% if i+1 in el.answers %} checked{% endif %}><div>{{ ele }}</div></label>{% endfor %}
+
+		<br><br>
+		<h3 class="u-title">Theory</h3>
+		<textarea id="editor" name="theory" placeholder="Theory" class="u-cont">{{ el.theory }}</textarea>
+
+		<input type="submit" value="{% if type %}Add{% else %}Edit{% endif %}">
+	</form>
+
+<script>
+var editor = CKEDITOR.replace('editor',{height: 500});
+AjexFileManager.init({returnTo: 'ckeditor', editor: editor});
+</script>
+{% endmacro %}

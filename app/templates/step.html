@@ -1,0 +1,69 @@
+{% extends "main.html" %}
+{% block cont %}
+
+<style>
+input.u-step {
+	width: calc(50% - 14px);
+	margin: 7px;
+}
+
+.u-body img {
+	max-height: 80vh;
+	max-width: 100%;
+}
+
+@media all and (max-width: 640px) {
+	input.u-step {
+		width: calc(100% - 14px);
+	}
+
+	input.u-step:first-child {
+		margin-top: 25px;
+	}
+}
+</style>
+
+<h2 class="u-title">{{ step.name }} &nbsp; <a href="../../study/{{ id }}"><img src="/static/help.svg" alt="Help" title="Help"></a>{% if user.admin >= 5 or user.id == step.user %} &nbsp; <a href="?edit=1"><img src="/static/edit.svg" alt="Edit" title="Edit"></a>{% endif %}{% if user.admin >= 5 %}<div class="u-tag" style="font-size: 0.5em; margin: 0 15px 0 15px; padding: 0 10px 0 10px;">{% if step.status == 3 %}Published{% endif %}{% if step.status == 2 %}Waiting{% endif %}{% if step.status == 1 %}Draft{% endif %}{% if step.status == 0 %}Deleted{% endif %}</div>{% endif %}</h2>
+
+{% if complete %}
+<br>
+<h3 class="u-title">Theory</h3>
+{{ step.theory }}
+<br><hr><br>
+
+{% if spaces %}
+<h3 class="u-title">Spaces</h3>
+<div class="u-notes">
+	{% for i in spaces %}<a href="/spaces/{{ i.id }}"><div><div class="u-text">{{ i.name }} {{ i.surname }}<p>@ {{ i.login }}</p></div></div></a>{% endfor %}
+</div>
+<br><br><hr>
+{% endif %}
+<br>
+{% endif %}
+
+{% if step.cont %}
+<br>
+<div class="u-block">
+	{{ step.cont }}
+</div>
+<br><br>
+{% endif %}
+
+<form action="/sys_step_check?ladder={{ ladder }}&step={{ id }}" method="post" enctype="multipart/form-data">
+{% for i, el in enumerate(step.options) %}
+	<label class="u-check"><input type="checkbox"{% if complete %}{% if i+1 in step.answers %} checked{% endif %}{% else %} name="{{ i+1 }}" value="1"{% endif %}><div>{{ el }}</div></label>
+{% endfor %}
+
+	{% if not complete %}<input type="submit" value="Answer">{% endif %}
+</form>
+
+<br><br>
+
+<h4 class="u-title">Author: &nbsp; <a href="/user/{{ author.id }}" class="u-href">{{ author.name }} {{ author.surname }}</a> &nbsp; &nbsp; &nbsp; <img src="/static/token.svg">&nbsp;{{ step.total }}</h4><br>
+<h4 class="u-title"><a href="/ladder/{{ ladder }}">← Ladder page</a><br><br></h4>
+
+<br><hr><br>
+
+<input type="submit" value="< Add step" class="u-step" onclick="location.href='/admin/add/step/{{ ladder }}/{{ id }}';"><input type="submit" value="Add step >" class="u-step" onclick="location.href='/admin/add/step/{{ ladder }}/{{ id }}?after=1';">
+
+{% endblock %}

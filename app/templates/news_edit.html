@@ -1,0 +1,47 @@
+{% extends "main.html" %}
+{% block cont %}
+
+<script type="text/javascript" src="/static/editor/ckeditor.js"></script>
+
+<style>
+.u-ava {width: 100%; margin-top: 10px;}
+.u-step {width: 100%; cursor: pointer;}
+.u-href {display: block; content: ""; height: 100px; margin: -100px 0 0;}
+</style>
+
+<h2 class="u-title">Edit news &nbsp; <a href="./"><img src="/static/view.svg" alt="View" title="View"></a></h2>
+
+<form action="/sys_news_edit?id={{ news.id }}" method="post" enctype="multipart/form-data">
+	<input type="text" name="name" placeholder="Name" value="{{ news.name }}" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" required>
+
+	<img src="{{ preview('news', news.id) }}" alt="{{ news.name }}" title="{{ news.name }}" class="u-ava"><br>
+	<input type="file" name="preview" class="preview" id="preview">
+	<label for="preview">Cover picture</label>
+	<script>
+
+$('.preview').on('change', function() {
+	var file = this.value.split('\\');
+	file = file[file.length-1];
+
+	if ($('div').is('.u-files')) {
+		$('.u-files').html(file);
+	} else {
+		$('label').after('<div class="u-files">' + file + '</div>');
+	}
+});
+
+	</script>
+
+	<textarea name="description" placeholder="Description" class="u-cont">{{ news.description }}</textarea>
+
+	<textarea id="editor" name="cont" placeholder="Content" class="u-cont">{{ news.cont }}</textarea>
+
+	<input type="submit" value="Edit">
+</form>
+
+<script>
+var editor = CKEDITOR.replace('editor', {height: 500});
+AjexFileManager.init({returnTo: 'ckeditor', editor: editor});
+</script>
+
+{% endblock %}

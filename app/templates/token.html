@@ -1,0 +1,79 @@
+{% extends "main.html" %}
+{% block cont %}
+
+<script type="text/javascript" src="/static/qtum.js"></script>
+
+<style>
+font {
+	font-size: 1.7rem;
+	font-weight: bold;
+	width: 100%;
+	text-align: center;
+	display: block;
+	padding: 20px 0 15px 0;
+}
+
+.u-body {
+	text-align: center;
+	padding-top: 50px;
+}
+</style>
+
+<div class="u-auth">
+	<font>Authorization</font>
+	<input type="text" name="public" placeholder="Public key" required>
+	<input type="text" name="private" placeholder="Private key" required>
+	<input type="submit" value="Check" onclick="check()">
+
+	<script>
+
+var password = window.sessionStorage.getItem("password");
+
+if (!password) {
+	$('.u-body').html('<a href="/password/?url=token/?url={{ link }}">Enter password</a>');
+	window.location = '/password/?url=token/?url={{ link }}';
+}
+
+var public = window.localStorage.getItem("public");
+var private_enc = window.localStorage.getItem("private");
+
+if (public) {
+	$('input[name="public"]').attr('value', public);
+
+	if (private_enc) {
+		private = TEST.decrypt(private_enc, password);
+		if (private) {
+			$('input[name="private"]').attr('value', private);
+		}
+	}
+}
+
+function check() {
+	var public = $('input[name="public"]').val();
+	var private = $('input[name="private"]').val();
+	var private_enc = TEST.encrypt(private, password);
+
+	if (public != '{{ user.public }}') {
+		$('input[name="private"]').val('');
+		$('input[name="private"]').attr('placeholder', 'Wrong public key');
+	} else {
+		window.localStorage.setItem('public', public);
+		window.localStorage.setItem('private', private_enc);
+	
+		if (TEST.checkPrivKey(private, public)) {
+			$('.u-body').html('<a href="/{% if link %}{{ link }}{% endif %}">Return</a>');
+			window.location = '/{% if link %}{{ link }}{% endif %}';	
+		} else {
+			$('input[name="private"]').val('');
+			$('input[name="private"]').attr('placeholder', 'Invalid keys');
+		}
+	}
+
+}
+
+	</script>
+
+	<br><br>
+</div>
+
+{% endblock %}

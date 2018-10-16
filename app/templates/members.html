@@ -1,0 +1,12 @@
+{% extends "main.html" %}
+{% block cont %}
+
+{% from 'list_user.html' import list_user %}
+
+<div class="u-info" onclick="change();">↑ Tap on the logo ↑</div>
+
+<h2 class="u-title">Members</h2>
+
+{{ list_user(members, preview) }}
+
+{% endblock %}

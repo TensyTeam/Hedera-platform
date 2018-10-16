@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script src="/static/jquery.min.js"></script>
+
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<title>{% if title %}{{title}} &mdash; {% endif %}Tensegrity</title>
+	<link rel="shortcut icon" type="images/png" href="/static/favicon.png">
+	<!--<link rel="shortcut icon" type="images/svg" href="/static/favicon.svg">-->
+
+	<meta name="author" content="Poloz Alexey (polozhev@mail.ru)">
+	<meta name="description" content="{% if description %}{{ description }}{% else %}Educational ecosystem based on blended learning and flexible crypto economy.{% endif %}">
+	<meta name="keywords" content="{% if tags %}{% for i in tags %}{{ i }},{% endfor %}{% else %}blended learning system,education platform,tokens,blockchain{% endif %}">
+
+	<link rel="stylesheet" type="text/css" href="/static/main.css">
+	<!--<script src="/static/main_header.js"></script>-->
+
+	<!-- Google Аналитика -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-125708498-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-125708498-1');
+	</script>
+
+	<!-- Яндекс.Метрика -->
+	<script type="text/javascript" >
+		(function (d, w, c) {
+			(w[c] = w[c] || []).push(function() {
+				try {
+					w.yaCounter50328919 = new Ya.Metrika2({
+						id:50328919,
+						clickmap:true,
+						trackLinks:true,
+						accurateTrackBounce:true,
+						webvisor:true
+					});
+				} catch(e) { }
+			});
+
+			var n = d.getElementsByTagName("script")[0],
+				s = d.createElement("script"),
+				f = function () { n.parentNode.insertBefore(s, n); };
+			s.type = "text/javascript";
+			s.async = true;
+			s.src = "https://mc.yandex.ru/metrika/tag.js";
+
+			if (w.opera == "[object Opera]") {
+				d.addEventListener("DOMContentLoaded", f, false);
+			} else { f(); }
+		})(document, window, "yandex_metrika_callbacks2");
+	</script>
+	<noscript><div><img src="https://mc.yandex.ru/watch/50328919" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+
+{% if without_menu %}
+	<!-- Стили страниц информации -->
+	<style>
+		body, .u-header, .u-expand, .u-user a {
+			background-color: var(--new-main) !important;
+			color: var(--new-font) !important;
+		}
+
+		.u-search input {
+			background-color: var(--new-element) !important;
+			color: var(--new-font) !important;
+		}
+
+		.u-search input:hover {
+			background-color: #fff !important;
+			color: var(--new-font) !important;
+		}
+
+		.u-info, .u-footer a {
+			color: var(--new-font) !important;
+		}
+		
+		.u-footer, .u-footer div {
+			border-color: var(--new-font) !important;
+		}
+
+		.u-footer div:first-child {
+			width: 100%;
+			text-align: center;
+			margin-top: 15px;
+			padding: 5px;
+			border: 0;
+		}
+
+		.u-footer div:last-child {
+			width: 100%;
+			text-align: center;
+			border: 0;
+			padding: 5px;
+		}
+
+		.u-footer img {
+			margin: 0 15px 0 15px;
+		}
+
+		.u-body {
+			min-height: calc(100vh - 220px) !important;
+		}
+	</style>
+{% endif %}
+</head>
+<body>
+
+<script type="text/javascript" src="/static/socket.io.min.js"></script>
+<script type="text/javascript">
+
+// Уведомление о поиске учителя
+
+namespace = 'main';
+var socket = io.connect('{{ LINK }}' + namespace);
+
+$(document).ready(function() {
+	socket.on('teacher', function(mes) {
+		if (mes['teacher'] == {{ user.id }}) {
+			$('.u-notification').css('display', 'block');
+			$('.u-notification div').html('You can start training on ' + mes['ladder'] + ' ladder, ' + mes['step'] + ' step.');
+			$('.u-notification').attr('onclick', 'start_lesson(' + mes['id'] + ')');
+			$('.u-notification img').attr('onclick', 'cancel_lesson(' + mes['id'] + ')');
+		}
+	});
+
+	window.setInterval(function() {
+		socket.emit('online', {id: {{ user.id }}});
+	}, 100);
+});
+
+function start_lesson(id) {
+	$('.u-notification').css('display', 'none');
+
+	url = '/space/' + id;
+
+	$('.u-body').html('<a href="' + url + '">Teach</a>');
+	window.location = url;
+}
+
+function cancel_lesson(id) {
+	$('.u-notification').css('display', 'none');
+
+	socket.emit('cancel', {id: id});
+}
+
+</script>
+<div class="u-notification" style="display: none;"><div></div><img src="/static/close.svg" alt="Close" title="Close" onclick="$('.u-notification').css('display', 'none')"></div>
+
+<div class="u-header">
+	<div class="u-logo" onclick="change();">
+		<img src="/static/logo{% if without_menu %}4{% endif %}.svg">
+	</div><div class="u-expand">
+		<div class="u-search">
+			<form action="/search" method="post">
+				<input type="search" name="search" placeholder="Search">
+			</form>
+		</div><div class="u-user">
+
+{% if user.id %}
+			<a href="/user/{{ user.id }}">{{ user.login }}</a> &nbsp;<a href="/sys_sign_out" class="del">Log Out</a>
+{% else %}
+			<a class="del">Guest &nbsp;</a><a href="/login{% if url %}?url={{ url }}{% endif %}">Log In</a>
+{% endif %}
+
+		</div><div class="u-menu{% if without_menu %} u-without-menu{% endif %}">
+			<div onclick="location.href='/'"{% if 'index' in url %} class="u-selected"{% endif %}>Main</div>
+
+			<hr>
+			
+			<div onclick="location.href='/ladders'"{% if 'ladder' in url  %} class="u-selected"{% endif %}>Ladders <a href="/admin/add/ladder" class="u-add">+</a></div>
+			<div onclick="location.href='/members'"{% if 'members' in url or 'user' in url and 'space' not in url and url != 'user/%d' % user.id  %} class="u-selected"{% endif %}>Members</div>
+			<div onclick="location.href='/teach'"{% if 'teach' in url or 'wait' in url %} class="u-selected"{% endif %}>Teach</div>
+
+{% if user.admin and user.admin >= 3 %}
+			<hr>
+
+			<div onclick="location.href='/user/{{ user.id }}'"{% if 'cabinet' in url or url == 'user/%d' % user.id %} class="u-selected"{% endif %}>Profile <a href="/cabinet" class="u-add" style="padding-top: 1px;"><img src="/static/edit.svg"></a></div>
+
+{% if user.admin >= 4 %}
+			<div onclick="location.href='/admin'"{% if 'admin' in url %} class="u-selected"{% endif %}>Admin</div>
+{% endif %}
+
+			<div class="u-data">&nbsp;<img src="/static/rating_light.svg">&nbsp;{{ user.rating }}&nbsp; &nbsp; &nbsp;<img src="/static/token_light.svg">&nbsp;{{ user.balance }}</div>
+{% endif %}
+
+		</div>
+	</div>
+</div>
+
+<div class="u-body{% if without_menu %} u-without-menu{% endif %}">
+
+{% block cont %}{% endblock %}
+
+</div>
+
+<div class="u-footer">
+	<div>
+		© 2018 Tensegrity Inc.<br>
+		All rights reserved<br>
+		<a href="/about">About</a> &nbsp; | &nbsp; <a href="/news">News</a> &nbsp; | &nbsp; <a href="/feedback?url={{ url }}">Feedbacks & Troubles</a> &nbsp; | &nbsp; <a href="https://drive.google.com/file/d/1m3stYvN7y0WiF9d1H8L5UW5hO86rY5X8/view">White Paper</a>
+	</div><div>
+		<a href="https://vk.com/tensegrity_dapp"><img src="/static/vk.ico" alt="vk" title="VKontakte"></a>
+		<a href="https://www.facebook.com/tensegrity.dapp"><img src="/static/fb.ico" alt="fb" title="Facebook"></a>
+		<a href="https://www.instagram.com/tensegrity_dapp/"><img src="/static/ig.ico" alt="ig" title="Instagram"></a>
+		<a href="https://twitter.com/tensegrity_dapp"><img src="/static/twitter.ico" alt="twitter" title="twitter"></a>
+	</div>
+</div>
+</div>
+
+<!-- <style>
+.u-footer {
+	border: 0;
+	margin: 35px 0 20px 3vw;
+	text-align: center;
+}
+
+.u-footer div {
+	border-right: 1px solid var(--font-black);
+	color: var(--font-black);
+	padding: 0 4.5vw 0 4.5vw;
+}
+
+.u-footer div a {
+	color: var(--font-black);
+}
+
+.u-footer div:last-child {
+	border-right: 0;
+}
+</style>
+
+<div class="u-footer">
+	<div>© 2018 Tensegrity Inc.</div>
+	<div>All rights reserved</div>
+	<div><a href="/about">About</a></div>
+	<div><a href="/news">News</a></div>
+	<div><a href="/feedback?url={{ url }}">Feedbacks & Troubles</a></div>
+</div> -->
+
+<script src="/static/main_footer.js"></script>
+
+</body>
+</html>

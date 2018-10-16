@@ -1,0 +1,32 @@
+{% extends "main.html" %}
+{% block cont %}
+
+<style>
+.u-card img {
+	width: auto;
+}
+</style>
+
+<h2 class="u-title">History<!--  &nbsp; <a href="?edit=1"><img src="/static/add.svg" alt="Add" title="Add"></a> --></h2>
+
+<!-- <div class="u-tag"></div><br><br> -->
+
+{% for i in history %}
+<div class="u-card">
+	<h3 class="u-stat"><img src="/static/{% if i.out %}minus{% else %}plus{% endif %}.svg" alt="{% if i.out %}Minus{% else %}Plus{% endif %}" title="{% if i.out %}Minus{% else %}Plus{% endif %}"> &nbsp; {{ i.title }}</h3>
+
+	<h3 class="u-stat"><img src="/static/token.svg" alt="Tokens" title="Tokens"> &nbsp; {{ i.count }}</h3>
+
+{% if i.user %}
+	<h3 class="u-stat"><img src="/static/{% if i.out %}for{% else %}from{% endif %}.svg" alt="{% if i.out %}For{% else %}From{% endif %}" title="{% if i.out %}For{% else %}From{% endif %}"> &nbsp; <a href="/user/{{ i.user }}">@{{ i.login }}</a></h3>
+{% endif %}
+
+	<h3 class="u-stat"><img src="/static/time.svg" alt="Time" title="Time"> &nbsp; {{ time(i.time) }}</h3>
+
+{% if i.message %}
+	<h3 class="u-stat"><img src="/static/title.svg" alt="Title" title="Title"> &nbsp; {{ i.message }}</h3>
+{% endif %}
+</div>
+{% endfor %}
+
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "main.html" %}
+{% block cont %}
+
+<h2 class="u-title">Congratulations!</h2>
+
+<br>
+
+You have reached the top of the ladder. Now you can create the next step, or come back to the main page.
+
+<br><br>
+
+<input type="submit" value="Add step" class="u-step" onclick="location.href='/admin/add/step/{{ ladder }}';">
+
+{% endblock %}

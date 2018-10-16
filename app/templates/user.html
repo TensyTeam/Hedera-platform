@@ -1,0 +1,81 @@
+{% extends "main.html" %}
+{% block cont %}
+
+<style>
+	.u-block-photo {
+		width: 50%;
+	}
+
+	.u-block-photo img {
+		width: 100%;
+	}
+
+	.u-block-info {
+		width: 50%;
+		padding: 0 20px 0 20px;
+	}
+
+	.u-block-info h2 {
+		margin: 0;
+	}
+
+	.u-block-info hr {
+		margin: 10px 0 10px 0;
+	}
+
+	.u-token input {
+		width: calc(50% - 14px);
+		margin: 7px;
+	}
+
+	@media all and (max-width: 640px) {
+		.u-block-photo, .u-block-info {
+			width: 100%;
+		}
+
+		.u-token input {
+			width: calc(100% - 14px);
+		}
+
+		.u-token input:first-child {
+			margin-top: 25px;
+		}
+	}
+</style>
+
+{% if users.id == user.id %}
+	<a href="/cabinet"><h2 class="u-title">Edit personal ></h2></a><br>
+	<!-- <a href="/wallet"><h2 class="u-title">History ></h2></a><br><br> -->
+{% endif %}
+
+<div class="u-block-photo">
+	<img src="{{ preview('users', users.id) }}" alt="{{ users.surname }} {{ users.name }}" title="{{ users.surname }} {{ users.name }}">
+</div><div class="u-block-info">
+	<h2 class="u-title">{{ users.name }} {{ users.surname }}{% if user.admin >= 6 and users.admin >= 3 %} &nbsp; <a href="/sys_user_block/{{ users.id }}"><img src="/static/block.svg" alt="Block" title="Block"></a>{% endif %}</h2>
+	 &nbsp; @{{ users.login }}
+	<hr>
+	{{ users.mail }}
+	<br>
+	{{ users.description }}
+</div>
+
+{% if user.id and user.id != users.id %}
+<br>
+
+<!--<form action="" method="post" enctype="multipart/form-data" class="u-token">-->
+	<!--<input type="text" name="count" placeholder="Count" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" required><input type="submit" value="Send tokens">-->
+<!--</form>-->
+{% endif %}
+
+<br><br>
+
+<h2 class="u-title">Ladders &nbsp; <img src="/static/rating.svg" alt="Rating" title="Rating"> {{ users.rating }}</h2>
+
+<br>
+
+<div class="u-notes">
+	{% for i in users.ladders %}<a href="/ladder/{{ i }}"><div><div class="u-img" style="background-image: url({{ preview('ladders', i) }}");"></div><div class="u-text">{{ users.ladders[i].name }}<p>Complete {{ round(users.ladders[i].complete / users.ladders[i].all * 100) }}%</p></div></div></a>{% endfor %}
+</div>
+
+
+{% endblock %}

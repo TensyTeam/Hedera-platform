@@ -1,0 +1,15 @@
+{% extends "main.html" %}
+{% block cont %}
+
+<a href="news/add"><h2 style="u-title">Add news ></h2></a>
+
+<br><hr><br>
+
+{% for i in feedback %}
+	<div class="u-card">
+		<h3 style="u-title">{{ i.name }}{% if i.user %} (<a href="/user/{{ i.user.id }}">{{ i.user.name }} {{ i.user.surname }}</a>){% endif %} &nbsp; <a href="/sys_feedback_delete?id={{ i.id }}" style="vertical-align: bottom;"><img src="/static/delete.svg" alt="Delete" title="Delete" style="height: 1em; width: auto; vertical-align: top;"></a></h3>
+		{{ i.cont }}
+	</div>
+{% endfor %}
+
+{% endblock %}

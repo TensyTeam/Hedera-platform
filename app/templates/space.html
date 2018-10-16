@@ -1,0 +1,320 @@
+{% extends "main.html" %}
+{% block cont %}
+
+<!-- <script type="text/javascript" src="/static/qtum.js"></script> -->
+<script type="text/javascript" src="/static/editor/ckeditor.js"></script>
+
+<style>
+.u-check {
+	padding: 10px;
+	width: 100%;
+}
+
+.u-block {
+	width: 100%;
+}
+
+#teacher {
+	background-color: #fff;
+	border: 1px solid var(--quote);
+}
+</style>
+
+<h2 class="u-title">{{ ladder }} / {{ step }}</h2>
+
+<!--{% if cont %}-->
+<!--<br>-->
+<!--{{ cont }}-->
+<!--{% endif %}-->
+
+<br>
+
+<script type="text/javascript" charset="utf-8">
+
+// Проверка наличия пароля
+
+// var password = window.sessionStorage.getItem("password");
+
+// if (!password) {
+// 	$('.u-body').html('<a href="/password/?url=space/{{ id }}">Enter password</a>');
+// 	window.location = '/password/?url=space/{{ id }}';
+// }
+
+// Проверка наличя ключей
+
+// var public = window.localStorage.getItem("public");
+// var private_enc = window.localStorage.getItem("private");
+
+// var f = false;
+// if (public && private_enc) {
+// 	private = TEST.decrypt(private_enc, password);
+// 	if (!private) {
+// 		f = true;
+// 	} else if (!TEST.checkPrivKey(private, public)) {
+// 		f = true;
+// 	}
+// } else {
+// 	f = true;
+// }
+
+// if (f) {
+// 	$('.u-body').html('<a href="/token/?url=space/{{ id }}">Enter keys</a>');
+// 	window.location = '/token/?url=space/{{ id }}';
+// }
+
+</script>
+
+{% if teacher %}
+<h3 class="u-title">Your {% if user.id == student.id %}teacher: <a href="/user/{{ teacher.id }}">{{ teacher.name }} {{ teacher.surname }} (@{{ teacher.login }})</a>{% else %}student: <a href="/user/{{ student.id }}">{{ student.name }} {{student.surname }} (@{{ student.login }})</a>{% endif %}</h3>
+
+<br>
+
+<div class="u-block">
+	{% for i in messages %}
+	<div class="u-card"{% if not i.out %} id="teacher"{% endif %}>{{ i.cont }}</div>
+	{% endfor %}
+</div>
+
+{% if not finished %}
+<br><br>
+
+<iframe name="source" style="display: none;"></iframe>
+<form action="/sys_space?id={{ id }}" method="post" enctype="multipart/form-data" target="source">
+	<textarea id="editor" name="cont" placeholder="Message" class="u-descr"></textarea>
+	<input type="submit" value="Send" onclick="send()" class="u-dialog">
+</form>
+{% endif %}
+
+{% if user.id == student.id %}
+	{% if status == 0 %}
+<script>
+$('body').append('<div class="u-question"><div><h1>Waiting for the teacher.</h1></div></div>');
+</script>
+	{% else %}{% if status == 1 %}
+<script>
+$('body').append('<div class="u-question"><div><h1>Start learning?</h1><div onclick="redirect({{ id }}, {{ price }}, \'{{ wallet }}\')" class="u-yes">Start</div><div onclick="cancel({{ id }})" class="u-no">Cancel</div></div></div>');
+</script>
+	{% endif %}{% endif %}
+{% endif %}
+
+ <!--accesskey="q"-->
+
+<script type="text/javascript" charset="utf-8">
+
+// Получение сообщений
+namespace = 'space';
+var socket = io.connect('{{ LINK }}' + namespace);
+
+// {% if request %}
+// socket.emit('teacher', {id: {{ id }}});
+// {% endif %}
+
+$(document).ready(function() {
+	socket.on('message', function(mes) {
+		if (mes['session'] == {{ id }}) {
+			var cont = '<div class="u-card"';
+			if (!mes['out']) {
+				cont += 'id="teacher"';
+			}
+			cont += '>' + mes['cont'] + '</div>';
+
+			$('.u-block').append(cont);
+			if (mes['out'] == {% if user.id == student.id %}true{% else %}false{% endif %}) {
+				for (instance in CKEDITOR.instances) {
+					CKEDITOR.instances[instance].updateElement();
+					CKEDITOR.instances[instance].setData('');
+				}
+			}
+		}
+	});
+
+{% if user.id == student.id %}
+	socket.on('cancel', function(mes) {
+		if (mes['id'] == {{ id }}) {
+			url = '/ladder/{{ ladder_id }}/study/{{ step_id }}/?error=2';
+			$('.u-body').html('<a href="' + url + '">Return</a>');
+			window.location = url;
+		}
+	});
+
+	socket.on('timeout', function(mes) {
+		if (mes['id'] == {{ id }}) {
+			url = '/ladder/{{ ladder_id }}/study/{{ step_id }}/?error=3';
+			$('.u-body').html('<a href="' + url + '">Return</a>');
+			window.location = url;
+		}
+	});
+
+	socket.on('accept', function(mes) {
+		if (mes['id'] == {{ id }}) {
+			$('.u-question').html('<div><h1>Start learning?</h1><div onclick="redirect(' + mes['id'] + ', ' + mes['price'] + ', \'' + mes['teacher'] + '\')" class="u-yes">Start</div><div onclick="cancel(' + mes['id'] + ')" class="u-no">Cancel</div>');
+		}
+	});
+
+	// socket.on('transaction_teacher', function(mes) {
+	// 	if (mes['id'] == {{ id }}) {
+	// 		TEST.student_start_lesson(private, {teacher: mes['teacher'], price: mes['price'] * 100000})
+	// 		.then(function (res) {console.log(res);})
+	// 		.catch(err => console.log(err));
+	// 	}
+	// });
+
+	socket.on('accept', function(mes) {
+		if (mes['id'] == {{ id }}) {
+			$('.u-question').html('<div><h1>Start learning?</h1><div onclick="redirect(' + mes['id'] + ', ' + mes['price'] + ', \'' + mes['teacher'] + '\')" class="u-yes">Start</div><div onclick="cancel(' + mes['id'] + ')" class="u-no">Cancel</div>');
+		}
+	});
+{% else %}
+	socket.on('stop_yes', function(mes) {
+		if (mes['id'] == {{ id }}) {
+			url = '/teach';
+			$('.u-body').html('<a href="' + url + '">Return</a>');
+			window.location = url;
+		}
+	});
+
+	socket.on('stop_no', function(mes) {
+		if (mes['id'] == {{ id }}) {
+			url = '/teach';
+			$('.u-body').html('<a href="' + url + '">Return</a>');
+			window.location = url;
+		}
+	});
+
+	socket.on('cancel_to_teacher', function(mes) {
+		if (mes['id'] == {{ id }}) {
+			url = '/teach';
+			$('.u-body').html('<a href="' + url + '">Return</a>');
+			window.location = url;
+		}
+	});
+
+	// socket.on('transaction_student', function(mes) {
+	// 	if (mes['id'] == {{ id }}) {
+	// 		$('.u-block').append('<font color="#759e96">Payment is successful!</font>');
+	// 	}
+	// });
+{% endif %}
+
+	socket.on('time', function(mes) {
+		if (mes['id'] == {{ id }}) {
+			url = {% if user.id == student.id %}'/ladder/{{ ladder_id }}/study/{{ step_id }}/?error=4'{% else %}'/teach/'{% endif %};
+			$('.u-body').html('<a href="' + url + '">Return</a>');
+			window.location = url;
+		}
+	});
+
+	socket.on('disconnect', function() {
+		$('.u-block').append('Lost connection<br>');
+	});
+});
+
+{% if user.id == student.id %}
+// var password = window.sessionStorage.getItem("password");
+// var private = TEST.decrypt(window.localStorage.getItem("private"), password);
+
+function stop_yes(teacher) {
+	socket.emit('stop_yes', {id: {{ id }}});
+
+	url = '/sys_study_stop/{{ id }}?status=0';
+
+	// TEST.student_end_lesson(private, {isOk: true, teacher: teacher})
+	// .then(function (res) {
+	// 	$('.u-body').html('<a href="' + url + '&transaction=' + res + '">Return</a>');
+	// 	window.location = url + '&transaction=' + res;
+	// })
+	// .catch(err => console.log(err));
+
+	$('.u-body').html('<a href="' + url + '">Return</a>');
+	window.location = url;
+}
+
+function stop_no(teacher) {
+	socket.emit('stop_no', {id: {{ id }}});
+
+	url = '/sys_study_stop/{{ id }}?status=1';
+
+	// TEST.student_end_lesson(private, {isOk: false, teacher: teacher})
+	// .then(function (res) {
+	// 	$('.u-body').html('<a href="' + url + '&transaction=' + res + '">Return</a>');
+	// 	window.location = url + '&transaction=' + res;
+	// })
+	// .catch(err => console.log(err));
+
+	$('.u-body').html('<a href="' + url + '">Return</a>');
+	window.location = url;
+}
+
+function redirect(mes, price, teacher) {
+	$('.u-question').remove();
+
+	socket.emit('student_accept', {id: mes});
+};
+
+function cancel(mes) {
+	$('.u-question').remove()
+	$('.u-title').html('<a href="/ladder/{{ ladder_id }}/study/{{ step_id }}/?error=5">Back</a>');
+	window.location = '/ladder/{{ ladder_id }}/study/{{ step_id }}/?error=5';
+
+	socket.emit('student_cancel', {id: mes});
+};
+{% else %}
+function stop() {
+	socket.emit('stop', {id: {{ id }}});
+	url = '/teach/';
+	$('.u-body').html('<a href="' + url + '">Return</a>');
+	window.location = url;
+}
+{% endif %}
+
+// Отправка сообщений
+function send() {
+	var scroll_el = $('.u-card:last-child');
+	if ($(scroll_el).length < 70) {
+		$('html, body').animate({scrollTop: $(scroll_el).offset().top - 70}, 500);
+	}
+}
+
+// Редактор
+var editor = CKEDITOR.replace('editor', {height: 300});
+AjexFileManager.init({returnTo: 'ckeditor', editor: editor});
+
+// Отправка сообщения по сочетанию клавиш
+
+
+
+</script>
+
+{% if not finished %}
+<br><br><hr><br>
+<div class="u-buttons-space" style="width: 100%;">
+{% if user.id == student.id %}
+	<input type="submit" value="Finish learning" style="background-color: var(--green);" onclick="stop_yes('{{ wallet }}')"><br>
+	<a onclick="stop_no('{{ wallet }}')" style="color: #dc3545; text-decoration: underline; cursor: pointer;">Open dispute</a>
+{% else %}
+	<a onclick="stop()" style="color: #dc3545; text-decoration: underline; cursor: pointer;">Finish the lesson</a>
+{% endif %}
+</div>
+{% endif %}
+
+{% else %}
+<!-- <script type="text/javascript" charset="utf-8">
+
+TEST.send(private, '{{ PLATFORM_WALLET }}', {{ price }} / 1000)
+.then(function (res) {
+	console.log(res);
+})
+.catch(err => console.log(err));
+
+</script> -->
+
+<div class="u-block">
+	{{ theory }}
+</div>
+
+<br><br>
+
+<input type="submit" value="Question" onclick="location.href='/ladder/{{ ladder_id }}/question/{{ step_id }}';">
+{% endif %}
+
+{% endblock %}

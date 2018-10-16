@@ -1,0 +1,102 @@
+{% extends "main.html" %}
+{% block cont %}
+
+<script type="text/javascript" src="/static/qtum.js"></script>
+
+<style>
+.u-signup, .u-signin {
+	width: 50%;
+	padding: 0 5% 0 5%;
+}
+
+font {
+	font-size: 1.7rem;
+	font-weight: bold;
+	width: 100%;
+	text-align: center;
+	display: block;
+	padding: 20px 0 15px 0;
+}
+
+.u-alert {
+	margin-top: 20px;
+}
+
+@media all and (max-width: 850px) {
+	.u-signup, .u-signin {
+		width: 100%;
+	}
+}
+
+/* Подсказка при наведении */
+
+ul {
+	padding: 0 0 0 20px;
+}
+</style>
+
+<div class="u-signup">
+	<font>Sign Up</font>
+	<form action="/sys_sign_up{% if redirect %}?url={{ redirect }}{% endif %}" method="post">
+		<input type="text" name="name" placeholder="Name" title="<ul><li>Only letters</ul>" required>
+		<input type="text" name="surname" placeholder="Surname" title="<ul><li>Only letters</ul>" required>
+		<input type="text" name="login" placeholder="Login" readonly onfocus="this.removeAttribute('readonly')" title="<ul><li>From 3 to 10 characters inclusive<li>Only Latin letters and numbers<li>Use of letters is mandatory<li>The register is not considered</ul>" required>
+		<input type="email" name="mail" placeholder="Mail" readonly onfocus="this.removeAttribute('readonly')" title="<ul><li>Example: user@gmail.com</ul>" required>
+		<input type="password" name="pass" placeholder="Password" class="u-reg" readonly onfocus="this.removeAttribute('readonly')" title="<ul><li>From 6 to 40 characters inclusive<li>Latin letters, numbers and special characters (<code>!@#$%^&*()-_+=;:,./?\|`~[]{}</code>)<li>Use of letters and numbers is mandatory<li>The register is considered</ul>" required>
+		<div class="g-recaptcha" data-sitekey="6LeYMmkUAAAAAH11GeXRIw3BBXooXtKTm9cze9h6" style="margin: 10px 0 0 0; width: 100%; text-align: center;"></div>
+		<input type="submit" value="Sign Up" onclick="savepas('.u-reg')">
+	</form>
+	<div class="u-alert">
+		By clicking «Sign up» you automatically agree to <a href="/privacy" style="color: blue;">the Terms and Conditions</a>.
+	</div>
+</div><div class="u-signin">
+	<font>Log In</font>
+	<form action="/sys_sign_in{% if redirect %}?url={{ redirect }}{% endif %}" method="post">
+		<input placeholder="Login" name="login" required autofocus>
+		<input type="password" placeholder="Password" name="pass" class="u-auth" required>
+		<input type="submit" value="Log In" onclick="savepas('.u-auth')">
+	</form>
+	<div class="u-alert">
+	Password is case-sensitive
+	</div><br>
+	<div class="u-alert u-caps">
+	</div>
+
+	<script>
+
+// Caps Lock
+
+$('body').keypress(function(e) { 
+	var s = String.fromCharCode(e.which);
+	if (s.toUpperCase() === s && s.toLowerCase() !== s && !e.shiftKey) {
+		$('.u-caps').html('Caps Lock is on!');
+	} else {
+		$('.u-caps').html('');
+	}
+});
+
+// Сохранение пароля для шифрования ключей
+
+function savepas(clas) {
+	window.sessionStorage.setItem("password", $(clas).val());
+}
+
+// Подсказка при наведении
+
+$('.u-signup input').focus(function() {
+	title = $(this).attr('title');
+	$(this).after('<div style="border: 1px dashed var(--border); border-radius: 12px; padding: 6px 6px 1px 6px; width: 100%;" class="u-del">' + title + '</div>');
+});
+$('.u-signup input').focusout(function() {
+	$('.u-del').remove();
+});
+
+	</script>
+
+	<br><br>
+</div>
+
+<!-- Captcha -->
+<script src='https://www.google.com/recaptcha/api.js'></script>
+
+{% endblock %}

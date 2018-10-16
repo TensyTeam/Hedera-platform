@@ -1,0 +1,80 @@
+{% extends "main.html" %}
+{% block cont %}
+
+<style>
+.u-index {
+
+	top: 55px;
+	left: 0;
+	width: 100%;
+	height: calc(100% - 55px);
+
+	width: 100%;
+	padding: 0 10% 0 10%;
+	text-align: center;
+}
+
+.u-index a {
+	width: 80%; /*90%;*/
+	min-width: 335px;
+	margin: 3.5rem 0 0 0;
+}
+
+.u-main-button {
+	width: 40%; /*30%;*/
+	border-radius: 3rem;
+	border: 8px solid var(--new-font); /*var(--border);*/
+	font-size: 4rem;
+	padding: 0.5rem 1rem 0 1rem;
+	text-align: center;
+	/*background-color: var(--quote);*/
+	color: var(--new-font);
+}
+
+.u-main-text {
+	width: 60%; /*70%;*/
+	font-size: 1.7rem; /*2rem;*/
+	padding: 1rem 5% 0 5%; /*0.7rem 5% 0 5%;*/
+	color: var(--new-font);
+}
+
+.u-info {
+	color: var(--quote);
+	margin-top: 0;
+}
+
+@media all and (max-width: 1060px) {
+	.u-index a {
+		width: 90%;
+	}
+}
+
+@media all and (max-width: 950px) {
+	.u-index {
+		padding: 0;
+	}
+	
+	.u-index a {
+		width: 100%;
+	}
+}
+
+@media all and (max-width: 850px) {
+	.u-main-button {
+		width: 80%;
+	}
+
+	.u-main-text {
+		display: none;
+	}
+}
+</style>
+
+<div class="u-index">
+	<div class="u-info" onclick="change();">↑ Tap on the logo ↑</div>
+
+	<a href="/ladders" style="margin-top: 16%;"><div class="u-main-button">Learn</div><div class="u-main-text" style="text-align: left;">Learn from higher students and acquire knowledge in any subject</div></a>
+	<a href="/teach"><div class="u-main-text" style="text-align: right;">Teach other students and disseminate knowledge with consolidating it</div><div class="u-main-button">Teach</div></a>
+</div>
+
+{% endblock %}

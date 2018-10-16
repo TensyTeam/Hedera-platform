@@ -1,0 +1,47 @@
+{% extends "main.html" %}
+{% block cont %}
+
+{% from 'list_note.html' import list_note %}
+{% from 'list_user.html' import list_user %}
+
+{% if news %}
+<h2 class="u-title">News</h2>
+
+<div class="u-notes">
+	{% for i in news %}<a href="/news/{{ i.id }}"><div><div class="u-img" style="background-image: url({{ preview('news', i.id) }}");"></div><div class="u-text">{{ i.name }}</div></div></a>{% endfor %}
+</div>
+
+<br><br><hr><br>
+{% endif %}
+
+{% if users %}
+<h2 class="u-title">Users</h2>
+
+{{ list_user(users, preview) }}
+
+<br><br><hr><br>
+{% endif %}
+
+{% if ladders %}
+<h2 class="u-title">Ladders</h2>
+
+{{ list_note(ladders, preview) }}
+
+<br><br><hr><br>
+{% endif %}
+
+{% if steps %}
+<h2 class="u-title">Steps</h2>
+
+<div class="u-notes">
+	{% for i in steps %}<a href="/ladder/{{ i.ladder }}/question/{{ i.id }}"><div><div class="u-text">{{ i.name }}</div></div></a>{% endfor %}
+</div>
+
+<br><br><hr><br>
+{% endif %}
+
+{% if comments %}
+<h2 class="u-title">Comments</h2>
+{% endif %}
+
+{% endblock %}

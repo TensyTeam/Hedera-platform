@@ -1,0 +1,20 @@
+{% extends "main.html" %}
+{% block cont %}
+
+<h2 class="u-title">{{ news.name }}{% if user.admin >= 6 %} &nbsp; <a href="?edit=1"><img src="/static/edit.svg" alt="Edit" title="Edit"></a> &nbsp; <a href="/sys_news_delete?id={{ news.id }}"><img src="/static/delete.svg" alt="Delete" title="Delete"></a>{% endif %}</h2><br>
+
+<h5 class="u-title">{{ time(news.time) }}</h5><br>
+
+<img src="{{ preview('news', news.id) }}" alt="{{ news.name }}" title="{{ news.name }}" class="u-ava"><br>
+
+<div class="u-block">
+	{{ news.description }}
+</div>
+
+<br>
+
+<div class="u-block">
+	{{ news.cont }}
+</div>
+
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends "main.html" %}
+{% block cont %}
+
+{% macro block(id, name, login, price, rating, display=1) %}
+	<a href="/sys_study/?user={{ id }}&ladder={{ ladder }}&step={{ step }}" id="{{ id }}"{% if not id %} style="display: {% if display %}block{% else %}none{% endif %};"{% endif %}>
+		<div>
+			<div class="u-notes2-img">
+				<img src="{% if id %}{{ preview('users', id) }}{% else %}/static/bot.svg{% endif %}">
+			</div><div class="u-notes2-cont">
+				<h2 class="u-title">&nbsp; {{ name }}</h2>
+				{% if login %}<p>@{{ login }}</p>{% endif %}
+				<div>
+					{% if rating %}<h2 class="u-stat"><img src="/static/rating.svg" alt="Rating" title="Rating"> {{ rating }}</h2>{% endif %}
+					<h2 class="u-stat"><img src="/static/token.svg" alt="Tokens" title="Tokens"> {{ price }} ℏ</h2>
+				</div>
+			</div>
+		</div>
+	<br><br>
+	</a>
+{% endmacro %}
+
+<style>
+.u-notes2, .u-notes2 a {
+	width: 100%;
+}
+
+.u-notes2 a > div {
+	border: 1px dashed var(--border-active);
+	border-radius: 12px;
+	width: 100%;
+	padding: 10px;
+	/*position: relative;*/
+}
+
+.u-notes2-img {
+	width: 70px;
+}
+
+.u-notes2-img img {
+	width: 70px;
+	height: 70px;
+	border-radius: 50%;
+}
+
+.u-notes2-cont {
+	width: calc(100% - 70px); /*220px*/
+	padding: 5px 10px 5px 10px;
+}
+
+.u-notes2-cont h2 {
+	margin: 0;
+}
+
+.u-notes2-cont div {
+	margin: 5px 0 0 0;
+}
+</style>
+
+<script type="text/javascript" charset="utf-8">
+
+// Обновление списка учителей
+
+$(document).ready(function() {
+	namespace = 'study';
+	var socket = io.connect('{{ LINK }}' + namespace);
+
+	socket.on('add', function(mes) {
+		if (mes['ladder'] == {{ ladder }} && mes['step'] == {{ step }}) {
+			cont = '<a href="/sys_study/?user=' + mes['user'] + '&ladder=' + mes['ladder'] + '&step=' + mes['step'] + '" id="' + mes['user'] + '"><div><div class="u-notes2-img"><img src="' + mes['photo'] + '"></div><div class="u-notes2-cont"><h2 class="u-title">&nbsp; ' + mes['name'] + '</h2><p>@' + mes['login'] + '</p><div><h2 class="u-stat"><img src="/static/token.svg" alt="Tokens" title="Tokens"> ' + mes['tokens'] + ' ℏ</h2></div></div></div><br><br></a>';
+			$('.u-notes2#teachers').append(cont);
+
+			if ($('.u-notes2#teachers').children().length > 1) {
+				$('#0').css({'display': 'none'});
+			}
+		}
+	});
+
+	socket.on('remove', function(mes) {
+		if (mes['ladder'] == {{ ladder }} && mes['step'] == {{ step }}) {
+			$('#' + mes['user']).remove();
+
+			if ($('.u-notes2').children().length == 1) {
+				$('#0').css({'display': 'block'});
+			}
+		}
+	});
+});
+
+</script>
+
+{% if error %}
+<div class="u-message">
+	{% if error == '1' %}You did mistake! To go further you could take a lesson with some user, who has already passed this step. If there are no online users you can take a lesson from bot:{% endif %}
+	{% if error == '2' %}The teacher canceled the lesson{% endif %}
+	{% if error == '3' %}The teacher did not begin the lesson{% endif %}
+	{% if error == '4' %}There were not messages for a long time{% endif %}
+	{% if error == '5' %}You canceled the lesson{% endif %}
+</div>
+
+<br><br>
+{% endif %}
+
+<h2 class="u-title">Study</h2>
+
+<br>
+
+<div class="u-notes2" id="teachers">
+{{ block(0, 'Bot', '', bot.price, 0, not users) }}
+
+{% for i in teachers %}
+{{ block(i.id, i.name, i.login, i.price, i.rating) }}
+{% endfor %}
+
+{% for i in users %}
+{{ block(i.id, i.name, i.login, i.price, i.rating) }}
+{% endfor %}
+</div>
+
+{% if online %}
+<br><h2 class="u-title">Online users</h2><br>
+<div class="u-notes2" id="online">
+
+{% for i in online %}
+{{ block(i.id, i.name, i.login, i.price, i.rating) }}
+{% endfor %}
+
+</div>
+{% endif %}
+
+{% endblock %}

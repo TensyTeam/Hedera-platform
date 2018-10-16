@@ -1,0 +1,108 @@
+{% extends "main.html" %}
+{% block cont %}
+
+<!-- <script type="text/javascript" src="/static/qtum.js"></script> -->
+
+<h2 class="u-title">Connection</h2>
+
+<style>
+.u-body a {
+	color: blue;
+}
+</style>
+
+<br>
+
+<script type="text/javascript" charset="utf-8">
+
+// Проверка наличия пароля
+
+// var password = window.sessionStorage.getItem("password");
+
+// if (!password) {
+// 	$('.u-body').html('<a href="/password/?url=teach">Enter password</a>');
+// 	window.location = '/password/?url=teach';
+// }
+
+// Проверка наличя ключей
+
+// var public = window.localStorage.getItem("public");
+// var private_enc = window.localStorage.getItem("private");
+
+// var f = false;
+// if (public && private_enc) {
+// 	private = TEST.decrypt(private_enc, password);
+// 	if (!private) {
+// 		f = true;
+// 	} else if (!TEST.checkPrivKey(private, public)) {
+// 		f = true;
+// 	}
+// } else {
+// 	f = true;
+// }
+
+// if (f) {
+// 	$('.u-body').html('<a href="/token/?url=teach">Enter keys</a>');
+// 	window.location = '/token/?url=teach';
+// }
+
+// Обновление предложений
+
+namespace = 'teach';
+var socket = io.connect('{{ LINK }}' + namespace);
+
+$(document).ready(function() {
+	socket.on('connect', function() {
+		$('.u-title').text('Waiting for students...');
+	});
+
+	socket.on('study', function(mes) {
+		if (mes['teacher'] == {{ user.id }}) {
+			$('body').append('<div class="u-question"><div><h1>Start learning?</h1><div onclick="redirect(' + mes['id'] + ', ' + mes['price'] + ', \'' + mes['wallet_student'] + '\', \'' + mes['wallet_author'] + '\')" class="u-yes">Accept</div><div onclick="cancel(' + mes['id'] + ')" class="u-no">Cancel</div></div>');
+		}
+	});
+
+	socket.on('timeout', function(mes) {
+		if (mes['id'] == {{ user.id }}) {
+			$('.u-question').remove();
+			$('.u-title').html('<a href="/teach/?error=1' + mes + '">Return</a>');
+			window.location = '/teach/?error=1';
+		}
+	});
+
+	window.setInterval(function() {
+		socket.emit('wait', {id: {{ user.id }}});
+	}, 100);
+
+	socket.on('disconnect', function() {
+		$('.u-title').text('Lost connection');
+	});
+});
+
+function redirect(mes, price, student, author) {
+	$('.u-question').remove();
+
+	url = '/space/' + mes;
+
+	$('.u-title').html('<a href="' + url + '">Teach</a>');
+	window.location = url;
+
+	// var password = window.sessionStorage.getItem("password");
+	// var private = TEST.decrypt(window.localStorage.getItem("private"), password);
+
+	// TEST.teacher_ready_to_give_lesson(private, {price: price * 100000, student: student, author: author, duration: 1500})
+	// .then(function (res) {
+	// 	$('.u-title').html('<a href="' + url + '/?transaction=' + res + '">Teach</a>');
+	// 	window.location = url + '/?transaction=' + res;
+	// })
+	// .catch(err => console.log(err));
+}
+
+function cancel(mes) {
+	$('.u-question').remove();
+	$('.u-title').text('Waiting for students...');
+	socket.emit('cancel', {id: mes});
+}
+</script>
+
+{% endblock %}

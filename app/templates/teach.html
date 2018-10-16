@@ -1,0 +1,40 @@
+{% extends "main.html" %}
+{% block cont %}
+
+<style>
+input[type=text] {
+	width: 70px;
+	margin-top: 0;
+}
+</style>
+
+{% if error %}
+<div class="u-message">
+	{% if error == '1' %}You did not start the lesson on time{% endif %}
+</div>
+
+<br><br>
+{% endif %}
+
+<h2 class="u-title">Teach</h2>
+
+<br>
+
+{% if not_empty %}
+<form action="/wait" method="post" enctype="multipart/form-data">
+{% for ladder in user.ladders %}
+	{% if user.ladders[ladder].complete %}
+	<a href="/ladder/{{ ladder }}"><h4 class="u-title">{{ user.ladders[ladder].name }}</h4></a>
+	{% for step in user.ladders[ladder].steps %}
+	<div class="u-check"><input type="checkbox" name="{{ ladder }}-{{ step.id }}" value="1"{% if step.checked %} checked{% endif %}><a href="/ladder/{{ ladder }}/question/{{ step.id }}"> &nbsp; <div>{{ step.name }}</div></a> <input type="text" name="{{ ladder }}price{{ step.id }}" value="{{ step.price }}"></div>
+	{% endfor %}
+	<br><hr><br>
+	{% endif %}
+{% endfor %}
+	<input type="submit" value="Start">
+</form>
+{% else %}
+<h3 class="u-title">You do not have any steps!</h3>
+{% endif %}
+
+{% endblock %}

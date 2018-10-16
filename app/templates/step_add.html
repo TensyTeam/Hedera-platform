@@ -1,0 +1,8 @@
+{% extends "main.html" %}
+{% block cont %}
+
+{% from 'list_step_one.html' import list_step %}
+
+{{ list_step(None, ladder, step, None, user, steps, False, after) }}
+
+{% endblock %}

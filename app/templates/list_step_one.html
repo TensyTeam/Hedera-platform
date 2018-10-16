@@ -1,0 +1,33 @@
+{% macro list_step(el, ladder, step, answers, user, steps, href=False, after=False) %}
+<script type="text/javascript" src="/static/editor/ckeditor.js"></script>
+
+	<h2 class="u-title">{% if el %}Step {{ step }}{% if step == 0 %} (Ground){% endif %}{% if user.admin >= 6 %} &nbsp; <a href="/sys_step_delete?ladder={{ ladder }}&step={{ step }}"><img src="/static/delete.svg" alt="Delete" title="Delete"></a>{% endif %}{% else %}Add step{% endif %}</h2>
+
+	<form action="/sys_step_{% if el %}edit{% else %}add{% endif %}?ladder={{ ladder }}{% if el %}&step={{ step }}{% endif %}{% if href %}&href=1{% endif %}" method="post" enctype="multipart/form-data">
+		<input type="text" name="name" placeholder="Name" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" required{% if el %} value="{{ el.name }}"{% endif %}>
+
+		<br><br>
+		{% if after %}After{% else %}Before{% endif %} the step:<br>
+		<select name="{% if after %}after{% else %}before{% endif %}">
+			<option disabled>{% if after %}After{% else %}Before{% endif %} the step</option>
+			<option value="-1" selected>--- {% if after %}To the begining{% else %}In the end{% endif %} ---</option>
+			{% for j in steps %}
+			{% if not (el and j[0] == step) %}<option value="{{ j[0] }}"{% if (el and ((not after and el.next and j[0] == el.next.id) or (after and el.prev and j[0] == el.prev.id))) or (not el and j[0] == step) %}selected{% endif %}>{{ j[1] }}</option>{% endif %}
+			{% endfor %}
+		</select>
+
+		<br><br>
+		Content:<br>
+		<textarea id="editor" name="cont" placeholder="Content" class="u-cont">{% if el %}{{ el.cont }}{% endif %}</textarea>
+		<br>
+
+		<textarea name="options" placeholder="Options (example: option 1; option 2)" class="u-descr" required>{% if el %}{{ ';'.join(el.options) }}{% endif %}</textarea>
+
+		<input type="submit" value="Continue">
+	</form>
+
+<script>
+var editor = CKEDITOR.replace('editor', {height: 500});
+AjexFileManager.init({returnTo: 'ckeditor', editor: editor});
+</script>
+{% endmacro %}
